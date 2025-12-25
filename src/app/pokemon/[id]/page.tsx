@@ -9,6 +9,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import FavoriteButton from '@/components/FavoriteButton'
 import PokemonDetailSkeleton from '@/components/PokemonDetailSkeleton'
+import PokemonSEO from '@/components/PokemonSEO'
 import { getShimmerPlaceholder } from '@/lib/imagePlaceholder'
 
 export default function PokemonDetailPage() {
@@ -85,17 +86,19 @@ export default function PokemonDetailPage() {
   const typeBgColor = TYPE_COLORS[mainType] || TYPE_COLORS.normal
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="container mx-auto px-4">
-        <Link
-          href="/"
-          className="inline-flex items-center text-blue-500 hover:text-blue-700 mb-6 transition-colors"
-        >
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver a la Pokédex
-        </Link>
+    <>
+      <PokemonSEO details={details} species={species} />
+      <div className="min-h-screen py-8">
+        <div className="container mx-auto px-4">
+          <Link
+            href="/"
+            className="inline-flex items-center text-blue-500 hover:text-blue-700 mb-6 transition-colors"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver a la Pokédex
+          </Link>
 
         <div className="max-w-4xl mx-auto">
           <div className={`${typeBgColor} rounded-t-2xl p-8 text-white text-center relative overflow-hidden`}>
@@ -214,6 +217,7 @@ export default function PokemonDetailPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

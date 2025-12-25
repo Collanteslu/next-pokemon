@@ -52,6 +52,16 @@ export function useFavorites() {
     setFavorites([])
   }, [])
 
+  const importFromURL = useCallback((ids: number[]) => {
+    const validIds = ids.filter(id => typeof id === 'number' && id > 0 && id <= 1000)
+    setFavorites(validIds)
+  }, [])
+
+  const exportToURL = useCallback(() => {
+    if (favorites.length === 0) return ''
+    return favorites.join(',')
+  }, [favorites])
+
   return {
     favorites,
     addFavorite,
@@ -59,6 +69,8 @@ export function useFavorites() {
     toggleFavorite,
     isFavorite,
     clearFavorites,
+    importFromURL,
+    exportToURL,
     count: favorites.length
   }
 }

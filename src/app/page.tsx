@@ -8,10 +8,13 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { applyFilters } from '@/lib/filters'
+import { sortPokemons, type SortOption } from '@/lib/sort'
 import SearchBar from '@/components/SearchBar'
 import PokemonGrid from '@/components/PokemonGrid'
 import Pagination from '@/components/Pagination'
 import FilterBar from '@/components/FilterBar'
+import SortDropdown from '@/components/SortDropdown'
+import ShareFavoritesButton from '@/components/ShareFavoritesButton'
 import PokemonCardSkeleton from '@/components/PokemonCardSkeleton'
 
 export default function HomePage() {
@@ -23,18 +26,20 @@ export default function HomePage() {
   const [filters, setFilters] = useState<{ generation?: number; favorites?: boolean; search?: string }>({})
   const [infiniteScrollMode, setInfiniteScrollMode] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [sortOption, setSortOption] = useState<SortOption>('default')
 
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { favorites, count } = useFavorites()
+  const { favorites, count, importFromURL } = useFavorites()
 
   // Debounce de la búsqueda para evitar llamadas excesivas al API
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
-  // Aplicar filtros a los pokemons
+  // Aplicar filtros y ordenamiento a los pokemons
   const filteredPokemons = useMemo(() => {
-    return applyFilters(pokemons, filters, favorites)
-  }, [pokemons, filters, favorites])
+    const filtered = applyFilters(pokemons, filters, favorites)
+    return sortPokemons(filtered, sortOption)
+  }, [pokemons, filters, favorites, sortOption])
 
   const loadPokemons = async (page: number = 1, search: string = '', append: boolean = false) => {
     setIsLoading(true)
@@ -78,6 +83,18 @@ export default function HomePage() {
       loadPokemons(currentPage + 1, '', true)
     }
   }
+
+  // Efecto para cargar favoritos desde URL (solo una vez al montar)
+  useEffect(() => {
+    const favoritesParam = searchParams.get('favorites')
+    if (favoritesParam) {
+      const ids = favoritesParam.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id))
+      if (ids.length > 0) {
+        importFromURL(ids)
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Efecto para URL params (inicial y cambio de página)
   useEffect(() => {
@@ -138,9 +155,12 @@ export default function HomePage() {
         <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-blue-500">
           Pokédex
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
           Explora el fascinante mundo de los Pokémon. Descubre información detallada sobre todas las criaturas.
         </p>
+        <div className="flex justify-center">
+          <ShareFavoritesButton />
+        </div>
       </header>
 
       <SearchBar onSearch={handleSearch} initialValue={searchQuery} />
@@ -149,6 +169,11 @@ export default function HomePage() {
         filters={filters}
         onFilterChange={setFilters}
         favoritesCount={count}
+      />
+
+      <SortDropdown
+        currentSort={sortOption}
+        onSortChange={setSortOption}
       />
 
       {/* Toggle between pagination and infinite scroll */}

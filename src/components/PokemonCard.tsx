@@ -2,6 +2,7 @@ import { memo } from 'react'
 import type { Pokemon } from '@/types'
 import Image from 'next/image'
 import { SPRITE_URLS } from '@/lib/constants'
+import { getShimmerPlaceholder } from '@/lib/imagePlaceholder'
 import FavoriteButton from './FavoriteButton'
 
 interface PokemonCardProps {
@@ -42,6 +43,8 @@ function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
             sizes="(max-width: 640px) 96px, 128px"
             className="object-contain"
             loading="lazy"
+            placeholder="blur"
+            blurDataURL={getShimmerPlaceholder(128, 128)}
           />
         </div>
         

@@ -8,6 +8,8 @@ import type { PokemonDetails, PokemonSpecies } from '@/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import FavoriteButton from '@/components/FavoriteButton'
+import PokemonDetailSkeleton from '@/components/PokemonDetailSkeleton'
+import { getShimmerPlaceholder } from '@/lib/imagePlaceholder'
 
 export default function PokemonDetailPage() {
   const params = useParams()
@@ -40,14 +42,7 @@ export default function PokemonDetailPage() {
   }, [params.id])
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="text-gray-600 dark:text-gray-300">Cargando información del Pokémon...</p>
-        </div>
-      </div>
-    )
+    return <PokemonDetailSkeleton />
   }
 
   if (error || !pokemonDetails) {
@@ -119,6 +114,8 @@ export default function PokemonDetailPage() {
                   sizes="192px"
                   className="object-contain drop-shadow-2xl"
                   priority
+                  placeholder="blur"
+                  blurDataURL={getShimmerPlaceholder(192, 192)}
                 />
               </div>
               <h1 className="text-4xl font-bold capitalize mb-2">{details.name}</h1>

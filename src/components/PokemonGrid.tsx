@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import PokemonCard from './PokemonCard'
+import PokemonCardSkeleton from './PokemonCardSkeleton'
 import type { Pokemon } from '@/types'
 
 interface PokemonGridProps {
@@ -17,17 +18,7 @@ function PokemonGrid({ pokemons, onPokemonClick, isLoading }: PokemonGridProps) 
         aria-label="Cargando Pokémon"
       >
         {Array.from({ length: 20 }).map((_, index) => (
-          <div
-            key={`skeleton-${index}`}
-            className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse"
-            aria-hidden="true"
-          >
-            <div className="p-4 flex flex-col items-center">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 mb-4 bg-gray-200 rounded-lg" />
-              <div className="h-6 w-3/4 bg-gray-200 rounded mb-2" />
-              <div className="h-4 w-1/4 bg-gray-200 rounded" />
-            </div>
-          </div>
+          <PokemonCardSkeleton key={`skeleton-${index}`} />
         ))}
         <span className="sr-only">Cargando lista de Pokémon...</span>
       </div>

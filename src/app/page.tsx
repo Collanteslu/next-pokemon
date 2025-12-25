@@ -6,11 +6,13 @@ import { pokemonAPI } from '@/lib/api'
 import { Pokemon, PaginationInfo } from '@/types'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useFavorites } from '@/hooks/useFavorites'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { applyFilters } from '@/lib/filters'
 import SearchBar from '@/components/SearchBar'
 import PokemonGrid from '@/components/PokemonGrid'
 import Pagination from '@/components/Pagination'
 import FilterBar from '@/components/FilterBar'
+import PokemonCardSkeleton from '@/components/PokemonCardSkeleton'
 
 export default function HomePage() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([])
@@ -19,6 +21,8 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<{ generation?: number; favorites?: boolean; search?: string }>({})
+  const [infiniteScrollMode, setInfiniteScrollMode] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -32,7 +36,7 @@ export default function HomePage() {
     return applyFilters(pokemons, filters, favorites)
   }, [pokemons, filters, favorites])
 
-  const loadPokemons = async (page: number = 1, search: string = '') => {
+  const loadPokemons = async (page: number = 1, search: string = '', append: boolean = false) => {
     setIsLoading(true)
     setError(null)
 
@@ -48,17 +52,30 @@ export default function HomePage() {
         })
       } else {
         const result = await pokemonAPI.getPokemonList(page, 20)
-        setPokemons(result.pokemons)
+        if (append) {
+          setPokemons((prev) => [...prev, ...result.pokemons])
+        } else {
+          setPokemons(result.pokemons)
+        }
         setPagination(result.pagination)
+        setCurrentPage(page)
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al cargar los Pokémon'
       console.error('Error loading pokemons:', error)
       setError(errorMessage)
-      setPokemons([])
-      setPagination(null)
+      if (!append) {
+        setPokemons([])
+        setPagination(null)
+      }
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadMore = () => {
+    if (pagination?.hasNextPage && !isLoading && !searchQuery) {
+      loadPokemons(currentPage + 1, '', true)
     }
   }
 
@@ -96,6 +113,25 @@ export default function HomePage() {
     loadPokemons(page, searchQuery)
   }
 
+  const handleToggleScrollMode = () => {
+    setInfiniteScrollMode(!infiniteScrollMode)
+    if (!infiniteScrollMode) {
+      // Switching to infinite scroll: reset to page 1
+      setPokemons([])
+      setCurrentPage(1)
+      loadPokemons(1, searchQuery)
+    }
+  }
+
+  // Use infinite scroll hook
+  const sentinelRef = useInfiniteScroll({
+    onLoadMore: loadMore,
+    hasMore: pagination?.hasNextPage ?? false,
+    isLoading,
+    threshold: 0.5,
+    rootMargin: '200px',
+  })
+
   return (
     <div className="space-y-8">
       <header className="text-center space-y-6">
@@ -114,6 +150,32 @@ export default function HomePage() {
         onFilterChange={setFilters}
         favoritesCount={count}
       />
+
+      {/* Toggle between pagination and infinite scroll */}
+      {!searchQuery && (
+        <div className="flex justify-center">
+          <button
+            onClick={handleToggleScrollMode}
+            className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 transition-colors text-gray-700 dark:text-gray-300 font-medium"
+            aria-label={infiniteScrollMode ? 'Cambiar a paginación' : 'Cambiar a scroll infinito'}
+          >
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              {infiniteScrollMode ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              )}
+            </svg>
+            {infiniteScrollMode ? 'Modo Paginación' : 'Modo Scroll Infinito'}
+          </button>
+        </div>
+      )}
 
       {error && (
         <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
@@ -137,10 +199,39 @@ export default function HomePage() {
         <PokemonGrid
           pokemons={filteredPokemons}
           onPokemonClick={handlePokemonClick}
-          isLoading={isLoading}
+          isLoading={isLoading && !infiniteScrollMode}
         />
 
-        {pagination && !searchQuery && pokemons.length > 0 && (
+        {/* Infinite scroll sentinel and loading indicator */}
+        {infiniteScrollMode && !searchQuery && (
+          <>
+            <div ref={sentinelRef} className="h-20" aria-hidden="true" />
+            {isLoading && pagination?.hasNextPage && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-6">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <PokemonCardSkeleton key={`loading-more-${index}`} />
+                ))}
+              </div>
+            )}
+            {!pagination?.hasNextPage && pokemons.length > 0 && (
+              <div className="text-center mt-8 py-4 text-gray-600 dark:text-gray-400">
+                <svg
+                  className="w-12 h-12 mx-auto mb-2 text-gray-400 dark:text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="font-medium">¡Has visto todos los Pokémon!</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Regular pagination */}
+        {!infiniteScrollMode && pagination && !searchQuery && pokemons.length > 0 && (
           <Pagination
             pagination={pagination}
             currentPage={pagination.currentPage}

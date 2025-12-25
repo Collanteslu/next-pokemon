@@ -1,0 +1,82 @@
+{
+  "home": {
+    "title": "Pokédex",
+    "description": "Explora el fascinante mundo de los Pokémon. Descubre información detallada sobre todas las criaturas.",
+    "searchPlaceholder": "Buscar Pokémon...",
+    "searchResults": "Se encontraron {count} Pokémon para \"{query}\"",
+    "searching": "Buscando \"{query}\"...",
+    "noResults": "No se encontraron Pokémon",
+    "noResultsDescription": "Intenta con otra búsqueda"
+  },
+  "pokemon": {
+    "backToPokedex": "Volver a la Pokédex",
+    "loading": "Cargando información del Pokémon...",
+    "error": "No se pudo cargar la información del Pokémon",
+    "noDescription": "No hay descripción disponible",
+    "basicInfo": "Información Básica",
+    "height": "Altura",
+    "weight": "Peso",
+    "id": "ID",
+    "types": "Tipos",
+    "abilities": "Habilidades",
+    "hiddenAbility": "Oculta",
+    "stats": "Estadísticas Base",
+    "description": "Descripción"
+  },
+  "stats": {
+    "hp": "PS",
+    "attack": "Ataque",
+    "defense": "Defensa",
+    "special-attack": "At. Especial",
+    "special-defense": "Def. Especial",
+    "speed": "Velocidad"
+  },
+  "types": {
+    "normal": "Normal",
+    "fire": "Fuego",
+    "water": "Agua",
+    "electric": "Eléctrico",
+    "grass": "Planta",
+    "ice": "Hielo",
+    "fighting": "Lucha",
+    "poison": "Veneno",
+    "ground": "Tierra",
+    "flying": "Volador",
+    "psychic": "Psíquico",
+    "bug": "Bicho",
+    "rock": "Roca",
+    "ghost": "Fantasma",
+    "dragon": "Dragón",
+    "dark": "Siniestro",
+    "steel": "Acero",
+    "fairy": "Hada"
+  },
+  "pagination": {
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "goToPage": "Ir a la página {page}",
+    "currentPage": "Página {page}",
+    "label": "Paginación"
+  },
+  "accessibility": {
+    "loading": "Cargando",
+    "loadingList": "Cargando lista de Pokémon...",
+    "pokemonList": "Lista de Pokémon",
+    "viewDetails": "Ver detalles de {name}",
+    "search": "Buscar Pokémon por nombre",
+    "clearSearch": "Limpiar búsqueda"
+  },
+  "errors": {
+    "general": "Ocurrió un error. Por favor intenta de nuevo",
+    "network": "Error de red. Por favor verifica tu conexión",
+    "timeout": "La petición tardó demasiado. Intenta de nuevo",
+    "notFound": "Pokémon no encontrado",
+    "errorLoading": "Error al cargar"
+  },
+  "common": {
+    "retry": "Reintentar",
+    "close": "Cerrar",
+    "search": "Buscar",
+    "clear": "Limpiar"
+  }
+}

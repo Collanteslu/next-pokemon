@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withPWA from 'next-pwa'
 
 const nextConfig: NextConfig = {
   images: {
@@ -31,4 +32,42 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Configuración de PWA
+const pwaConfig = withPWA({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+  runtimeCaching: [
+    {
+      urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/.*/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'pokeapi-cache',
+        expiration: {
+          maxEntries: 200,
+          maxAgeSeconds: 24 * 60 * 60 // 24 hours
+        },
+        cacheableResponse: {
+          statuses: [0, 200]
+        }
+      }
+    },
+    {
+      urlPattern: /^https:\/\/raw\.githubusercontent\.com\/PokeAPI\/sprites\/.*/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'pokemon-sprites',
+        expiration: {
+          maxEntries: 500,
+          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+        },
+        cacheableResponse: {
+          statuses: [0, 200]
+        }
+      }
+    }
+  ]
+})
+
+export default pwaConfig(nextConfig);

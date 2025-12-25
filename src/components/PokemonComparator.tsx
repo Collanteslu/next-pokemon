@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import type { PokemonDetails } from '@/types'
 import Image from 'next/image'
 import { TYPE_COLORS } from '@/lib/constants'

@@ -7,8 +7,6 @@ interface SortDropdownProps {
 }
 
 function SortDropdown({ currentSort, onSortChange }: SortDropdownProps) {
-  const currentOption = SORT_OPTIONS.find(opt => opt.value === currentSort) || SORT_OPTIONS[0]
-
   return (
     <div className="w-full max-w-6xl mx-auto mb-4">
       <div className="flex items-center justify-end space-x-3">

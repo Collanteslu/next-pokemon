@@ -49,15 +49,20 @@ export default function SearchBar({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
+    <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto" role="search">
+      <label htmlFor="pokemon-search" className="sr-only">
+        Buscar Pokémon por nombre
+      </label>
       <div className="relative">
         <input
-          type="text"
+          id="pokemon-search"
+          type="search"
           value={query}
           onChange={handleChange}
           placeholder={placeholder}
           className="w-full px-6 py-4 pr-12 text-lg border-2 border-gray-300 rounded-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 shadow-sm"
           autoComplete="off"
+          aria-label="Buscar Pokémon por nombre"
         />
         
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
@@ -77,9 +82,9 @@ export default function SearchBar({
           <button
             type="submit"
             className="p-2 bg-blue-500 text-white hover:bg-blue-600 rounded-full transition-colors duration-200"
-            aria-label="Buscar"
+            aria-label="Buscar Pokémon"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>

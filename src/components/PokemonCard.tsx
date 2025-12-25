@@ -1,19 +1,22 @@
+import { memo } from 'react'
 import type { Pokemon } from '@/types'
 import Image from 'next/image'
+import { SPRITE_URLS } from '@/lib/constants'
 
 interface PokemonCardProps {
   pokemon: Pokemon
   onClick?: () => void
 }
 
-export default function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
+function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
   const pokemonId = pokemon.url.split('/').filter(Boolean).pop()
-  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`
+  const imageUrl = `${SPRITE_URLS.BASE}/${pokemonId}.png`
 
   return (
-    <div
+    <button
       onClick={onClick}
-      className="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 overflow-hidden"
+      className="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden w-full text-left"
+      aria-label={`Ver detalles de ${pokemon.name}`}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-blue-400 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
       
@@ -41,6 +44,9 @@ export default function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
       </div>
       
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-    </div>
+    </button>
   )
 }
+
+// Memoizar el componente para evitar re-renders innecesarios
+export default memo(PokemonCard)

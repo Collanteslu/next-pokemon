@@ -1,8 +1,11 @@
 import type { Pokemon } from '@/types'
+import { CACHE_CONFIG } from './constants'
 
-const CACHE_KEY = 'pokemon_list_cache'
-const CACHE_EXPIRY_KEY = 'pokemon_list_cache_expiry'
-const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 horas en milisegundos
+const CACHE_KEY = `${CACHE_CONFIG.KEY_PREFIX}list`
+const CACHE_EXPIRY_KEY = `${CACHE_CONFIG.KEY_PREFIX}list_expiry`
+const CACHE_DURATION = process.env.NEXT_PUBLIC_CACHE_DURATION
+  ? parseInt(process.env.NEXT_PUBLIC_CACHE_DURATION, 10)
+  : CACHE_CONFIG.POKEMON_LIST_DURATION
 
 interface PokemonCache {
   data: Pokemon[]

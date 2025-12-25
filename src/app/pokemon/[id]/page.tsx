@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { pokemonAPI } from '@/lib/api'
+import { TYPE_COLORS } from '@/lib/constants'
 import type { PokemonDetails, PokemonSpecies } from '@/types'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -85,28 +86,7 @@ export default function PokemonDetailPage() {
   )?.genus || 'Pokémon'
 
   const mainType = details.types[0]?.type.name || 'unknown'
-  const typeColors: { [key: string]: string } = {
-    normal: 'bg-gray-400',
-    fire: 'bg-red-500',
-    water: 'bg-blue-500',
-    electric: 'bg-yellow-400',
-    grass: 'bg-green-500',
-    ice: 'bg-cyan-400',
-    fighting: 'bg-red-700',
-    poison: 'bg-purple-600',
-    ground: 'bg-yellow-700',
-    flying: 'bg-blue-300',
-    psychic: 'bg-pink-500',
-    bug: 'bg-green-600',
-    rock: 'bg-yellow-800',
-    ghost: 'bg-purple-700',
-    dragon: 'bg-indigo-600',
-    dark: 'bg-gray-800',
-    steel: 'bg-gray-500',
-    fairy: 'bg-pink-400'
-  }
-
-  const typeBgColor = typeColors[mainType] || 'bg-gray-400'
+  const typeBgColor = TYPE_COLORS[mainType] || TYPE_COLORS.normal
 
   return (
     <div className="min-h-screen py-8">
@@ -167,7 +147,7 @@ export default function PokemonDetailPage() {
                     {details.types.map((typeInfo) => (
                       <span
                         key={typeInfo.type.name}
-                        className={`px-4 py-2 rounded-full text-white text-sm font-semibold capitalize ${typeColors[typeInfo.type.name] || 'bg-gray-400'}`}
+                        className={`px-4 py-2 rounded-full text-white text-sm font-semibold capitalize ${TYPE_COLORS[typeInfo.type.name] || TYPE_COLORS.normal}`}
                       >
                         {typeInfo.type.name}
                       </span>

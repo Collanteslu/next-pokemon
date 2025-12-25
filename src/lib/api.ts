@@ -1,10 +1,14 @@
 import { Pokemon, PokemonListResponse, PokemonDetails, PokemonSpecies, PaginationInfo } from '@/types';
 import { getPokemonListFromCache, savePokemonListToCache, searchPokemonInCache } from './cache';
+import { TIMEOUT_CONFIG } from './constants';
 
-const POKEAPI_BASE_URL = 'https://pokeapi.co/api/v2';
+const POKEAPI_BASE_URL = process.env.NEXT_PUBLIC_POKEAPI_BASE_URL || 'https://pokeapi.co/api/v2';
+const REQUEST_TIMEOUT = process.env.NEXT_PUBLIC_REQUEST_TIMEOUT
+  ? parseInt(process.env.NEXT_PUBLIC_REQUEST_TIMEOUT, 10)
+  : TIMEOUT_CONFIG.API_REQUEST;
 
 export class PokemonAPI {
-  private static async fetchWithErrorHandling<T>(url: string, timeout: number = 10000): Promise<T> {
+  private static async fetchWithErrorHandling<T>(url: string, timeout: number = REQUEST_TIMEOUT): Promise<T> {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);

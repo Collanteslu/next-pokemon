@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 import withPWA from 'next-pwa'
 
 const nextConfig: NextConfig = {
+  // Turbopack configuration (Next.js 16 default)
+  // Empty config acknowledges we're aware of Turbopack with webpack plugins
+  turbopack: {},
   images: {
     // Usar remotePatterns en lugar de domains (deprecated)
     remotePatterns: [

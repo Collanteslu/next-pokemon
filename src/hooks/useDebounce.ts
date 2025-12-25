@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 import { DEBOUNCE_CONFIG } from '@/lib/constants'
 

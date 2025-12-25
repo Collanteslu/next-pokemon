@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import ThemeToggle from '@/components/ThemeToggle'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -35,7 +36,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} font-sans min-h-screen bg-gradient-to-br from-red-50 via-white to-blue-50 antialiased`}>
+      <body className={`${inter.variable} font-sans min-h-screen bg-gradient-to-br from-red-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 antialiased`}>
+        <ThemeToggle />
         <div className="container mx-auto px-4 py-8">
           {children}
         </div>

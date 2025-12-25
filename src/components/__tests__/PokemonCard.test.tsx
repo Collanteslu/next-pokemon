@@ -33,7 +33,7 @@ describe('PokemonCard', () => {
 
     render(<PokemonCard pokemon={mockPokemon} onClick={handleClick} />)
 
-    const button = screen.getByRole('button')
+    const button = screen.getByRole('button', { name: /ver detalles de pikachu/i })
     await user.click(button)
 
     expect(handleClick).toHaveBeenCalledTimes(1)

@@ -16,6 +16,8 @@ export default function PokemonSEO({ details, species }: PokemonSEOProps) {
   useEffect(() => {
     const pokemonName = details.name.charAt(0).toUpperCase() + details.name.slice(1)
     const pokemonId = String(details.id).padStart(3, '0')
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+    const canonicalUrl = `${baseUrl}/pokemon/${details.id}`
 
     // Get English description
     const englishFlavorText = species.flavor_text_entries
@@ -43,6 +45,22 @@ export default function PokemonSEO({ details, species }: PokemonSEOProps) {
       meta.setAttribute('content', content)
     }
 
+    // Update or create link tags (for canonical URL)
+    const updateLinkTag = (rel: string, href: string) => {
+      let link = document.querySelector(`link[rel="${rel}"]`)
+
+      if (!link) {
+        link = document.createElement('link')
+        link.setAttribute('rel', rel)
+        document.head.appendChild(link)
+      }
+
+      link.setAttribute('href', href)
+    }
+
+    // Add canonical URL
+    updateLinkTag('canonical', canonicalUrl)
+
     // Standard meta tags
     updateMetaTag('description', `${pokemonName} - ${englishGenus}. ${englishFlavorText}`)
     updateMetaTag('keywords', `${pokemonName}, pokemon, pokedex, ${details.types.map(t => t.type.name).join(', ')}`)
@@ -52,7 +70,7 @@ export default function PokemonSEO({ details, species }: PokemonSEOProps) {
     updateMetaTag('og:description', `${englishGenus}: ${englishFlavorText}`, true)
     updateMetaTag('og:image', details.sprites.other['official-artwork'].front_default, true)
     updateMetaTag('og:type', 'website', true)
-    updateMetaTag('og:url', `${window.location.origin}/pokemon/${details.id}`, true)
+    updateMetaTag('og:url', canonicalUrl, true)
 
     // Twitter Card tags
     updateMetaTag('twitter:card', 'summary_large_image')
@@ -69,11 +87,11 @@ export default function PokemonSEO({ details, species }: PokemonSEOProps) {
       image: details.sprites.other['official-artwork'].front_default,
       identifier: pokemonId,
       additionalType: englishGenus,
-      url: `${window.location.origin}/pokemon/${details.id}`,
+      url: canonicalUrl,
       subjectOf: {
         '@type': 'WebPage',
         name: `${pokemonName} - Pokédex`,
-        url: `${window.location.origin}/pokemon/${details.id}`,
+        url: canonicalUrl,
       },
     }
 

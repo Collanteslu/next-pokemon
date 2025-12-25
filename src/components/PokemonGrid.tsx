@@ -7,9 +7,17 @@ interface PokemonGridProps {
   pokemons: Pokemon[]
   onPokemonClick: (pokemon: Pokemon) => void
   isLoading?: boolean
+  compareMode?: boolean
+  selectedForCompare?: string[]
 }
 
-function PokemonGrid({ pokemons, onPokemonClick, isLoading }: PokemonGridProps) {
+function PokemonGrid({
+  pokemons,
+  onPokemonClick,
+  isLoading,
+  compareMode = false,
+  selectedForCompare = []
+}: PokemonGridProps) {
   if (isLoading) {
     return (
       <div
@@ -51,14 +59,20 @@ function PokemonGrid({ pokemons, onPokemonClick, isLoading }: PokemonGridProps) 
       role="list"
       aria-label="Lista de Pokémon"
     >
-      {pokemons.map((pokemon) => (
-        <div key={pokemon.name} role="listitem">
-          <PokemonCard
-            pokemon={pokemon}
-            onClick={() => onPokemonClick(pokemon)}
-          />
-        </div>
-      ))}
+      {pokemons.map((pokemon) => {
+        const pokemonId = pokemon.url.split('/').filter(Boolean).pop() || ''
+        const isSelected = compareMode && selectedForCompare.includes(pokemonId)
+
+        return (
+          <div key={pokemon.name} role="listitem">
+            <PokemonCard
+              pokemon={pokemon}
+              onClick={() => onPokemonClick(pokemon)}
+              isSelected={isSelected}
+            />
+          </div>
+        )
+      })}
     </div>
   )
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { pokemonAPI } from '@/lib/api'
-import { Pokemon, PaginationInfo } from '@/types'
+import { Pokemon, PaginationInfo, PokemonDetails } from '@/types'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
@@ -16,6 +16,7 @@ import FilterBar from '@/components/FilterBar'
 import SortDropdown from '@/components/SortDropdown'
 import ShareFavoritesButton from '@/components/ShareFavoritesButton'
 import PokemonCardSkeleton from '@/components/PokemonCardSkeleton'
+import PokemonComparator from '@/components/PokemonComparator'
 
 export default function HomePage() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([])
@@ -27,6 +28,11 @@ export default function HomePage() {
   const [infiniteScrollMode, setInfiniteScrollMode] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [sortOption, setSortOption] = useState<SortOption>('default')
+  const [compareMode, setCompareMode] = useState(false)
+  const [selectedForCompare, setSelectedForCompare] = useState<string[]>([])
+  const [comparePokemon1, setComparePokemon1] = useState<PokemonDetails | null>(null)
+  const [comparePokemon2, setComparePokemon2] = useState<PokemonDetails | null>(null)
+  const [showComparator, setShowComparator] = useState(false)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -123,8 +129,66 @@ export default function HomePage() {
 
   const handlePokemonClick = (pokemon: Pokemon) => {
     const pokemonId = pokemon.url.split('/').filter(Boolean).pop()
-    router.push(`/pokemon/${pokemonId}`)
+
+    if (!pokemonId) return
+
+    if (compareMode) {
+      // In compare mode, select/deselect for comparison
+      setSelectedForCompare(prev => {
+        if (prev.includes(pokemonId)) {
+          // Deselect
+          return prev.filter(id => id !== pokemonId)
+        } else if (prev.length < 2) {
+          // Select (max 2)
+          return [...prev, pokemonId]
+        }
+        return prev
+      })
+    } else {
+      // Normal mode, navigate to detail
+      router.push(`/pokemon/${pokemonId}`)
+    }
   }
+
+  const handleToggleCompareMode = () => {
+    setCompareMode(!compareMode)
+    if (compareMode) {
+      // Exiting compare mode, reset selections
+      setSelectedForCompare([])
+      setComparePokemon1(null)
+      setComparePokemon2(null)
+      setShowComparator(false)
+    }
+  }
+
+  const handleCloseComparator = () => {
+    setShowComparator(false)
+    setSelectedForCompare([])
+    setComparePokemon1(null)
+    setComparePokemon2(null)
+    setCompareMode(false)
+  }
+
+  // Effect to load Pokemon details when 2 are selected
+  useEffect(() => {
+    const loadComparePokemons = async () => {
+      if (selectedForCompare.length === 2) {
+        try {
+          const [details1, details2] = await Promise.all([
+            pokemonAPI.getPokemonDetails(selectedForCompare[0]),
+            pokemonAPI.getPokemonDetails(selectedForCompare[1]),
+          ])
+          setComparePokemon1(details1)
+          setComparePokemon2(details2)
+          setShowComparator(true)
+        } catch (error) {
+          console.error('Error loading Pokemon for comparison:', error)
+        }
+      }
+    }
+
+    loadComparePokemons()
+  }, [selectedForCompare])
 
   const handlePageChange = (page: number) => {
     loadPokemons(page, searchQuery)
@@ -176,9 +240,32 @@ export default function HomePage() {
         onSortChange={setSortOption}
       />
 
-      {/* Toggle between pagination and infinite scroll */}
-      {!searchQuery && (
-        <div className="flex justify-center">
+      {/* Toggle buttons */}
+      <div className="flex justify-center gap-4 flex-wrap">
+        {/* Compare mode toggle */}
+        <button
+          onClick={handleToggleCompareMode}
+          className={`inline-flex items-center px-4 py-2 border-2 rounded-lg transition-all font-medium ${
+            compareMode
+              ? 'bg-purple-500 border-purple-500 text-white shadow-lg'
+              : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-purple-500 dark:hover:border-purple-400 text-gray-700 dark:text-gray-300'
+          }`}
+          aria-label={compareMode ? 'Salir del modo comparación' : 'Activar modo comparación'}
+        >
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          {compareMode ? `Comparar (${selectedForCompare.length}/2)` : 'Modo Comparación'}
+        </button>
+
+        {/* Infinite scroll toggle */}
+        {!searchQuery && (
           <button
             onClick={handleToggleScrollMode}
             className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 transition-colors text-gray-700 dark:text-gray-300 font-medium"
@@ -199,8 +286,8 @@ export default function HomePage() {
             </svg>
             {infiniteScrollMode ? 'Modo Paginación' : 'Modo Scroll Infinito'}
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {error && (
         <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
@@ -225,6 +312,8 @@ export default function HomePage() {
           pokemons={filteredPokemons}
           onPokemonClick={handlePokemonClick}
           isLoading={isLoading && !infiniteScrollMode}
+          compareMode={compareMode}
+          selectedForCompare={selectedForCompare}
         />
 
         {/* Infinite scroll sentinel and loading indicator */}
@@ -276,6 +365,15 @@ export default function HomePage() {
           </div>
         )}
       </main>
+
+      {/* Pokemon Comparator Modal */}
+      {showComparator && (
+        <PokemonComparator
+          pokemon1={comparePokemon1}
+          pokemon2={comparePokemon2}
+          onClose={handleCloseComparator}
+        />
+      )}
     </div>
   )
 }

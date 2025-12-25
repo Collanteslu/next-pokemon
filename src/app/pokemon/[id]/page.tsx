@@ -10,6 +10,7 @@ import Link from 'next/link'
 import FavoriteButton from '@/components/FavoriteButton'
 import PokemonDetailSkeleton from '@/components/PokemonDetailSkeleton'
 import PokemonSEO from '@/components/PokemonSEO'
+import TypeEffectivenessChart from '@/components/TypeEffectivenessChart'
 import { getShimmerPlaceholder } from '@/lib/imagePlaceholder'
 
 export default function PokemonDetailPage() {
@@ -213,6 +214,11 @@ export default function PokemonDetailPage() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Type Effectiveness Chart - Full Width */}
+            <div className="mt-8">
+              <TypeEffectivenessChart types={details.types} />
             </div>
           </div>
         </div>

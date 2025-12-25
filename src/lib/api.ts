@@ -1,18 +1,28 @@
 import { Pokemon, PokemonListResponse, PokemonDetails, PokemonSpecies, PaginationInfo } from '@/types';
+import { getPokemonListFromCache, savePokemonListToCache, searchPokemonInCache } from './cache';
 
 const POKEAPI_BASE_URL = 'https://pokeapi.co/api/v2';
 
 export class PokemonAPI {
-  private static async fetchWithErrorHandling<T>(url: string): Promise<T> {
+  private static async fetchWithErrorHandling<T>(url: string, timeout: number = 10000): Promise<T> {
     try {
-      const response = await fetch(url);
-      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       return await response.json();
     } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error('Request timeout - Please try again');
+        }
+      }
       console.error('API Error:', error);
       throw error;
     }
@@ -41,16 +51,53 @@ export class PokemonAPI {
     };
   }
 
+  /**
+   * Búsqueda optimizada de Pokémon por nombre
+   * Estrategia:
+   * 1. Intenta búsqueda directa si el nombre es exacto
+   * 2. Usa caché local si está disponible
+   * 3. Descarga lista completa solo si no hay caché (y la guarda)
+   */
   static async searchPokemonByName(name: string): Promise<Pokemon[]> {
     if (!name.trim()) return [];
-    
+
+    const searchQuery = name.toLowerCase().trim();
+
     try {
+      // Estrategia 1: Intenta búsqueda directa (para nombres exactos)
+      try {
+        const directResult = await this.fetchWithErrorHandling<PokemonDetails>(
+          `${POKEAPI_BASE_URL}/pokemon/${searchQuery}`
+        );
+        // Si encontró coincidencia exacta, retorna como lista
+        return [{
+          id: directResult.id,
+          name: directResult.name,
+          url: `${POKEAPI_BASE_URL}/pokemon/${directResult.id}/`
+        }];
+      } catch {
+        // No es una coincidencia exacta, continúa con búsqueda parcial
+      }
+
+      // Estrategia 2: Busca en caché local
+      const cachedResults = searchPokemonInCache(searchQuery);
+      if (cachedResults) {
+        return cachedResults.slice(0, 20); // Limita a 20 resultados
+      }
+
+      // Estrategia 3: Descarga lista completa y guarda en caché
       const url = `${POKEAPI_BASE_URL}/pokemon?limit=1000`;
       const data = await this.fetchWithErrorHandling<PokemonListResponse>(url);
-      
-      return data.results.filter(pokemon =>
-        pokemon.name.toLowerCase().includes(name.toLowerCase())
+
+      // Guarda en caché para futuras búsquedas
+      savePokemonListToCache(data.results);
+
+      // Filtra y retorna resultados
+      const filtered = data.results.filter(pokemon =>
+        pokemon.name.toLowerCase().includes(searchQuery)
       );
+
+      return filtered.slice(0, 20); // Limita a 20 resultados
     } catch (error) {
       console.error('Search error:', error);
       return [];

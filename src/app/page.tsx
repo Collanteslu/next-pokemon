@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { pokemonAPI } from '@/lib/api'
 import { Pokemon, PaginationInfo } from '@/types'
+import { useDebounce } from '@/hooks/useDebounce'
 import SearchBar from '@/components/SearchBar'
 import PokemonGrid from '@/components/PokemonGrid'
 import Pagination from '@/components/Pagination'
@@ -13,16 +14,22 @@ export default function HomePage() {
   const [pagination, setPagination] = useState<PaginationInfo | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   const searchParams = useSearchParams()
   const router = useRouter()
 
+  // Debounce de la búsqueda para evitar llamadas excesivas al API
+  const debouncedSearchQuery = useDebounce(searchQuery, 300)
+
   const loadPokemons = async (page: number = 1, search: string = '') => {
     setIsLoading(true)
+    setError(null)
+
     try {
       if (search.trim()) {
         const searchResults = await pokemonAPI.searchPokemonByName(search)
-        setPokemons(searchResults.slice(0, 20))
+        setPokemons(searchResults)
         setPagination({
           currentPage: 1,
           totalPages: 1,
@@ -35,7 +42,9 @@ export default function HomePage() {
         setPagination(result.pagination)
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al cargar los Pokémon'
       console.error('Error loading pokemons:', error)
+      setError(errorMessage)
       setPokemons([])
       setPagination(null)
     } finally {
@@ -43,14 +52,26 @@ export default function HomePage() {
     }
   }
 
+  // Efecto para URL params (inicial y cambio de página)
   useEffect(() => {
     const pageParam = searchParams.get('page')
     const searchParam = searchParams.get('search')
     const page = pageParam ? parseInt(pageParam, 10) : 1
-    
+
     setSearchQuery(searchParam || '')
-    loadPokemons(page, searchParam || '')
+
+    // Solo carga si no hay búsqueda activa (la búsqueda se maneja con el debounce)
+    if (!searchParam) {
+      loadPokemons(page, '')
+    }
   }, [searchParams])
+
+  // Efecto para búsqueda con debounce
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      loadPokemons(1, debouncedSearchQuery)
+    }
+  }, [debouncedSearchQuery])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -76,9 +97,27 @@ export default function HomePage() {
         </p>
       </header>
 
-      <SearchBar onSearch={handleSearch} />
+      <SearchBar onSearch={handleSearch} initialValue={searchQuery} />
+
+      {error && (
+        <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
+          <svg className="w-5 h-5 text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-red-800">Error al cargar</h3>
+            <p className="text-sm text-red-600 mt-1">{error}</p>
+          </div>
+        </div>
+      )}
 
       <main>
+        {searchQuery && isLoading && (
+          <div className="text-center py-4 text-gray-500 text-sm">
+            Buscando &quot;{searchQuery}&quot;...
+          </div>
+        )}
+
         <PokemonGrid
           pokemons={pokemons}
           onPokemonClick={handlePokemonClick}
@@ -93,7 +132,7 @@ export default function HomePage() {
           />
         )}
 
-        {searchQuery && pokemons.length > 0 && (
+        {searchQuery && pokemons.length > 0 && !isLoading && (
           <div className="text-center mt-8 text-gray-600">
             Se encontraron <span className="font-semibold text-blue-600">{pokemons.length}</span> Pokémon para &quot;{searchQuery}&quot;
           </div>

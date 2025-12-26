@@ -9,14 +9,14 @@ export const defaultLocale: Locale = 'es'
 
 export default getRequestConfig(async ({ locale }) => {
   // Validar que el locale sea válido
-  const validLocale = locale && locales.includes(locale as Locale) ? locale as Locale : defaultLocale
-
   if (!locale || !locales.includes(locale as Locale)) {
     notFound()
   }
 
+  const validLocale = locale as Locale
+
   return {
     locale: validLocale,
-    messages: (await import(`../messages/${validLocale}.json`)).default
+    messages: (await import(`./messages/${validLocale}.json`)).default
   }
 })

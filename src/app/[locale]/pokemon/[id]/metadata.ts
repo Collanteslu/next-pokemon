@@ -2,14 +2,15 @@ import type { Metadata } from 'next'
 import { pokemonAPI } from '@/lib/api'
 
 interface PokemonPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function generateMetadata({ params }: PokemonPageProps): Promise<Metadata> {
+  const { id } = await params
   try {
-    const { details, species } = await pokemonAPI.getPokemonWithSpecies(params.id)
+    const { details, species } = await pokemonAPI.getPokemonWithSpecies(id)
     const englishGenus = species.genera.find(
       entry => entry.language.name === 'en'
     )?.genus || 'Pokémon'

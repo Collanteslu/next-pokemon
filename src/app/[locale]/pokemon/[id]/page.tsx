@@ -74,11 +74,11 @@ export default function PokemonDetailPage() {
 
   const { details, species } = pokemonDetails
   const pokemonId = String(details.id).padStart(3, '0')
-  
+
   const englishFlavorText = species.flavor_text_entries.find(
     entry => entry.language.name === 'en'
   )?.flavor_text || 'No description available.'
-  
+
   const englishGenus = species.genera.find(
     entry => entry.language.name === 'en'
   )?.genus || 'Pokémon'

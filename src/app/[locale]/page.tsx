@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { pokemonAPI } from '@/lib/api'
 import { Pokemon, PaginationInfo, PokemonDetails } from '@/types'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -36,7 +36,11 @@ export default function HomePage() {
 
   const searchParams = useSearchParams()
   const router = useRouter()
+  const pathname = usePathname()
   const { favorites, count, importFromURL } = useFavorites()
+
+  // Extraer el locale de la ruta actual
+  const locale = pathname.split('/')[1] || 'es'
 
   // Debounce de la búsqueda para evitar llamadas excesivas al API
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
@@ -146,7 +150,7 @@ export default function HomePage() {
       })
     } else {
       // Normal mode, navigate to detail
-      router.push(`/pokemon/${pokemonId}`)
+      router.push(`/${locale}/pokemon/${pokemonId}`)
     }
   }
 

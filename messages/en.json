@@ -1,0 +1,82 @@
+{
+  "home": {
+    "title": "Pokédex",
+    "description": "Explore the fascinating world of Pokémon. Discover detailed information about all creatures.",
+    "searchPlaceholder": "Search Pokémon...",
+    "searchResults": "Found {count} Pokémon for \"{query}\"",
+    "searching": "Searching \"{query}\"...",
+    "noResults": "No Pokémon found",
+    "noResultsDescription": "Try another search"
+  },
+  "pokemon": {
+    "backToPokedex": "Back to Pokédex",
+    "loading": "Loading Pokémon information...",
+    "error": "Could not load Pokémon information",
+    "noDescription": "No description available",
+    "basicInfo": "Basic Information",
+    "height": "Height",
+    "weight": "Weight",
+    "id": "ID",
+    "types": "Types",
+    "abilities": "Abilities",
+    "hiddenAbility": "Hidden",
+    "stats": "Base Stats",
+    "description": "Description"
+  },
+  "stats": {
+    "hp": "HP",
+    "attack": "Attack",
+    "defense": "Defense",
+    "special-attack": "Sp. Attack",
+    "special-defense": "Sp. Defense",
+    "speed": "Speed"
+  },
+  "types": {
+    "normal": "Normal",
+    "fire": "Fire",
+    "water": "Water",
+    "electric": "Electric",
+    "grass": "Grass",
+    "ice": "Ice",
+    "fighting": "Fighting",
+    "poison": "Poison",
+    "ground": "Ground",
+    "flying": "Flying",
+    "psychic": "Psychic",
+    "bug": "Bug",
+    "rock": "Rock",
+    "ghost": "Ghost",
+    "dragon": "Dragon",
+    "dark": "Dark",
+    "steel": "Steel",
+    "fairy": "Fairy"
+  },
+  "pagination": {
+    "previous": "Previous page",
+    "next": "Next page",
+    "goToPage": "Go to page {page}",
+    "currentPage": "Page {page}",
+    "label": "Pagination"
+  },
+  "accessibility": {
+    "loading": "Loading",
+    "loadingList": "Loading Pokémon list...",
+    "pokemonList": "Pokémon List",
+    "viewDetails": "View {name} details",
+    "search": "Search Pokémon by name",
+    "clearSearch": "Clear search"
+  },
+  "errors": {
+    "general": "An error occurred. Please try again",
+    "network": "Network error. Please check your connection",
+    "timeout": "Request timed out. Try again",
+    "notFound": "Pokémon not found",
+    "errorLoading": "Error loading"
+  },
+  "common": {
+    "retry": "Retry",
+    "close": "Close",
+    "search": "Search",
+    "clear": "Clear"
+  }
+}

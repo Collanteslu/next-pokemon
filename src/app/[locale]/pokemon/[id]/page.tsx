@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import { pokemonAPI } from '@/lib/api'
 import { TYPE_COLORS } from '@/lib/constants'
 import type { PokemonDetails, PokemonSpecies } from '@/types'
@@ -15,6 +15,8 @@ import { getShimmerPlaceholder } from '@/lib/imagePlaceholder'
 
 export default function PokemonDetailPage() {
   const params = useParams()
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'es'
   const [pokemonDetails, setPokemonDetails] = useState<{
     details: PokemonDetails
     species: PokemonSpecies
@@ -92,7 +94,7 @@ export default function PokemonDetailPage() {
       <div className="min-h-screen py-8">
         <div className="container mx-auto px-4">
           <Link
-            href="/"
+            href={`/${locale}`}
             className="inline-flex items-center text-blue-500 hover:text-blue-700 mb-6 transition-colors"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

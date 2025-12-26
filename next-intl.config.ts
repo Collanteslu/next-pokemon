@@ -1,9 +1,7 @@
-import { Config } from 'next-intl'
-
-const config: Config = {
+const config = {
   locales: ['es', 'en'],
   defaultLocale: 'es',
   localeDetection: false
-}
+} as const
 
 export default config
